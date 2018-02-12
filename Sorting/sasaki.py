@@ -14,7 +14,7 @@ class Channel:
         self.round = currentRound
         self.destination = destinationNode
 
-    def passMessage(self, message, side, flag=0):
+    def pass_message(self, message, flag):
         
         print "Process ", self.pid, ": send ", message, " to ", " Process", self.destination.pid
         self.destination.receive(message, flag, self.pid, self.round)
@@ -42,33 +42,43 @@ class Process:
         
         if flagr==1:
             self.left_value = -sys.maxint
+            self.area = -1
 
     def send(self):
         
         if self.right_node != None:
             
             ch = Channel(self.right_node, self.pid, self.round)
-            ch.passMessage(self.right_value, self.right_flag)
+            ch.pass_message(self.right_value, self.right_flag)
 				
         if self.left_node != None:
             
             ch = Channel(self.left_node, self.pid, self.round)
-            ch.passMessage(self.left_value, self.left_flag)
+            ch.pass_message(self.left_value, self.left_flag)
 
     def receive(self, message, flag, processId, currentRound):
         		
         print "Process ", processId, ": Receive ", message, " to ", " Process", self.pid
 
         if processId > self.pid:
+            
             if message < self.right_value:
                     
                 self.tempR_value = message
                 self.tempR_flag = flag
 
+                if self.tempR_flag!=0:
+                    x[processId].area = x[processId].area + 1
+
         else:
+            
             if message > self.left_value:
+                
                 self.tempL_value = message
                 self.tempL_flag = flag
+
+                if self.tempL_flag!=0:
+                    x[self.pid].area = x[self.pid].area - 1
     
     def local(self):
 
@@ -79,12 +89,14 @@ class Process:
             self.right_value = self.tempR_value
             self.right_flag = self.tempR_flag
             self.tempR_value = None
+            self.tempR_flag  = 0
 
         if self.tempL_value != None:
     
             self.left_value = self.tempL_value
             self.left_flag = self.tempL_flag
             self.tempL_value = None
+            self.tempL_flag = 0
 
         if self.left_value>self.right_value:
                 
@@ -144,8 +156,12 @@ def main(n):
     print "Final State of Processes\n\n"
 	
     for i in range(1,n+1):
-            
-        print "Process ", x[i].pid, " : ", x[i].left_value, "|", x[i].right_value
+        
+        if x[i].area==-1:
+            print "Process ", x[i].pid, " : ", x[i].right_value
+        
+        else:
+            print "Process ", x[i].pid, " : ", x[i].left_value
 
     print "\n"
 
