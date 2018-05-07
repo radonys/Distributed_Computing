@@ -1,5 +1,8 @@
 import random
 import copy
+import sys
+
+#Code for Algorithm 2, where there are 4 state machines
 
 #Ring Initialization
 def makeRing(n):
@@ -28,60 +31,70 @@ def printRingState(ring_network):
     print("\n")
 
 #Main Function
-processors = 4
-ring_network = makeRing(processors)
 
-print("State of the initial ring is:\n")
-printRingState(ring_network)
+program_name = sys.argv[0]
+arguments = sys.argv[1:]
+count = len(arguments)
 
-flag = True
-counter = 1
+if count<1 or count>1:
+    sys.exit("All Parameters not entered")
 
-while flag==True:
+else:
 
-    temp = copy.deepcopy(ring_network)
-    
-    print(temp)
-    print("\n")
+    processors = int(arguments[0])
+    ring_network = makeRing(processors)
 
-    for i in range(0,processors):
+    print("State of the initial ring is:\n")
+    printRingState(ring_network)
 
-        if ring_network[i][3]==-1:
+    flag = True
+    counter = 1
+
+    while flag==True:
+
+        temp = copy.deepcopy(ring_network)
+        
+        print(temp)
+        print("\n")
+
+        for i in range(0,processors):
+
+            if ring_network[i][3]==-1:
+                
+                right = (i+1)%processors
+
+                if ring_network[i][1]==ring_network[right][1] and (not ring_network[right][2]):
+
+                    ring_network[i][1] = not ring_network[i][1]
+
+            elif ring_network[i][2]==1:
             
-            right = (i+1)%processors
+                left = (i-1)%processors
 
-            if ring_network[i][1]==ring_network[right][1] and (not ring_network[right][2]):
+                if ring_network[i][1]==ring_network[left][1]:
 
-                ring_network[i][1] = not ring_network[i][1]
+                    ring_network[i][1] = not ring_network[i][1]
 
-        elif ring_network[i][2]==1:
+            else:
+
+                left = (i-1)%processors
+                right = (i+1)%processors
+
+                if ring_network[i][1]==ring_network[left][1]:
+
+                    ring_network[i][1] = not ring_network[i][1]
+                    ring_network[i][2] = True
+
+                if ring_network[i][1]==ring_network[right][1] and ring_network[i][2] and (not ring_network[right][2]):
+
+                    ring_network[i][2] = False
+
+            print(str(counter) + ". State of the ring after " + str(i) + " processor:\n")
+            printRingState(ring_network)
         
-            left = (i-1)%processors
+        counter += 1
 
-            if ring_network[i][1]==ring_network[left][1]:
-
-                ring_network[i][1] = not ring_network[i][1]
-
-        else:
-
-            left = (i-1)%processors
-            right = (i+1)%processors
-
-            if ring_network[i][1]==ring_network[left][1]:
-
-                ring_network[i][1] = not ring_network[i][1]
-                ring_network[i][2] = True
-
-            if ring_network[i][1]==ring_network[right][1] and ring_network[i][2] and (not ring_network[right][2]):
-
-                ring_network[i][2] = False
-
-        print(str(counter) + ". State of the ring after " + str(i) + " processor:\n")
-        printRingState(ring_network)
-    
-    counter += 1
-
-    if cmp(temp,ring_network)==0:
-        
-        flag = False
-        break
+        if cmp(temp,ring_network)==0:
+            
+            flag = False
+            break
